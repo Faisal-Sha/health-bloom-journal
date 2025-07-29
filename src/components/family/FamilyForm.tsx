@@ -10,7 +10,6 @@ import { FamilyMember } from '@/stores/familyStore';
 const familySchema = z.object({
   name: z.string().min(1, 'Name is required'),
   age: z.number().min(0, 'Age must be positive').max(150, 'Age must be realistic'),
-  relation: z.string().min(1, 'Relation is required'),
 });
 
 type FamilyFormData = z.infer<typeof familySchema>;
@@ -26,8 +25,7 @@ export function FamilyForm({ member, onSubmit, onCancel }: FamilyFormProps) {
     resolver: zodResolver(familySchema),
     defaultValues: {
       name: member?.name || '',
-      age: member?.age || 0,
-      relation: member?.relation || '',
+      age: member?.age || 0
     },
   });
 
@@ -63,7 +61,7 @@ export function FamilyForm({ member, onSubmit, onCancel }: FamilyFormProps) {
             )}
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="relation">Relation</Label>
             <Input
               id="relation"
@@ -73,7 +71,7 @@ export function FamilyForm({ member, onSubmit, onCancel }: FamilyFormProps) {
             {form.formState.errors.relation && (
               <p className="text-sm text-destructive">{form.formState.errors.relation.message}</p>
             )}
-          </div>
+          </div> */}
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onCancel}>

@@ -16,20 +16,39 @@ export default function Family() {
   const { entries } = useEntryStore();
   const { toast } = useToast();
 
-  const handleSubmit = (data: any) => {
+  const handleSubmit = async (data: any) => {
     if (editingMember) {
-      updateMember(editingMember.id, data);
-      toast({
-        title: "Member Updated",
-        description: "Family member profile has been successfully updated.",
-      });
+      const result = await updateMember(editingMember.id, data);
+      if (result?.success) {
+        toast({
+          title: "Member Updated",
+          description: "Family member profile has been successfully updated.",
+        });
+      } else {
+        toast({
+          title: "Update Failed",
+          description: result?.message || "Could not update member.",
+          variant: "destructive",
+        });
+        return;
+      }
     } else {
-      addMember(data);
-      toast({
-        title: "Member Added",
-        description: "New family member has been added to your profiles.",
-      });
+      const result = await addMember(data);
+      if (result?.success) {
+        toast({
+          title: "Member Added",
+          description: "New family member has been added to your profiles.",
+        });
+      } else {
+        toast({
+          title: "Add Failed",
+          description: result?.message || "Could not add member.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
+  
     setShowForm(false);
     setEditingMember(null);
   };
@@ -39,7 +58,7 @@ export default function Family() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async(id: string) => {
     const memberEntries = entries.filter(entry => entry.familyMemberId === id);
     if (memberEntries.length > 0) {
       toast({
@@ -50,12 +69,20 @@ export default function Family() {
       return;
     }
     
-    deleteMember(id);
-    toast({
-      title: "Member Removed",
-      description: "Family member has been removed from your profiles.",
-      variant: "destructive",
-    });
+    const result = await deleteMember(id);
+    if (result.success) {
+      toast({
+        title: "Member Removed",
+        description: "Family member has been removed from your profiles.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Deletion Failed",
+        description: result.message || "An error occurred while deleting the member.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getMemberStats = (memberId: string) => {
@@ -98,8 +125,8 @@ export default function Family() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {members.map((member) => (
-              <div key={member.id} className="space-y-2">
+            {members.map((member, index) => (
+              <div key={index} className="space-y-2">
                 <FamilyCard
                   member={member}
                   onEdit={handleEdit}

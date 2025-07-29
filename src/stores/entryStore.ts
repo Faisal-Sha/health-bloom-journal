@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import api from '@/services/apiClient';
 
 export interface DiaryEntry {
   id: string;
@@ -27,32 +28,49 @@ export const useEntryStore = create<EntryState>()(
     (set, get) => ({
       entries: [],
 
-      addEntry: (entry) => {
-        const newEntry: DiaryEntry = {
-          ...entry,
-          id: Date.now().toString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        set((state) => ({
-          entries: [newEntry, ...state.entries]
-        }));
+      addEntry: async (entry) => {
+        try {
+          const response = await api.post('/family/entries', entry);
+          const newEntry: DiaryEntry = response.data;
+          set((state) => ({
+            entries: [newEntry, ...state.entries]
+          }));
+          return {success: true, entry: newEntry};
+        } catch (error) {
+          console.error('Error adding entry:', error);
+          return { success: false, message: error?.response?.data?.message || 'Failed to add entry.' };
+        }
       },
 
-      updateEntry: (id, updatedData) => {
-        set((state) => ({
-          entries: state.entries.map((entry) =>
-            entry.id === id
-              ? { ...entry, ...updatedData, updatedAt: new Date().toISOString() }
-              : entry
-          )
-        }));
+      updateEntry: async(id, updatedData) => {
+        try {
+          const response = await api.post(`/family/entries/${id}`, updatedData);
+          const update: DiaryEntry = response.data;
+          set((state) => ({
+            entries: state.entries.map((entry) =>
+              entry.id === id
+                ? { ...entry, ...updatedData, updatedAt: new Date().toISOString() }
+                : entry
+            )
+          }));
+          return {success: true, entry: update};
+        } catch (error) {
+          console.error('Error updating entry:', error);
+          return { success: false, message: error?.response?.data?.message || 'Failed to update entry.' };
+        }
       },
 
-      deleteEntry: (id) => {
-        set((state) => ({
-          entries: state.entries.filter((entry) => entry.id !== id)
-        }));
+      deleteEntry: async (id) => {
+        try {
+          await api.delete(`/family/entries/${id}`);
+          set((state) => ({
+            entries: state.entries.filter((entry) => entry.id !== id)
+          }));
+          return { success: true, message: 'Entry deleted successfully.' };
+        } catch (error) {
+          console.error('Error deleting entry:', error);
+          return { success: false, message: error?.response?.data?.message || 'Failed to delete entry.' };
+        }
       },
 
       getEntriesByDate: (date) => {

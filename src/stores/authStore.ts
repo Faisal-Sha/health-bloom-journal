@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import api from '@/services/apiClient';
 
 interface User {
   id: string;
@@ -31,56 +32,52 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true });
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Mock successful login
-          const mockUser: User = {
-            id: '1',
-            email,
-            name: email.split('@')[0],
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
-          };
-          
-          const mockToken = 'mock-jwt-token-' + Date.now();
-          
+          const response = await api.post('/auth/login', { email, password });
+          const { token, user } = response.data;
+      
           set({
-            user: mockUser,
-            token: mockToken,
+            user,
+            token,
             isAuthenticated: true,
-            isLoading: false
+            isLoading: false,
           });
-        } catch (error) {
+      
+          localStorage.setItem('token', token);
+      
+        } catch (error: any) {
           set({ isLoading: false });
-          throw new Error('Login failed');
+          const message =
+            error.response?.data?.error || 'Login failed. Please try again.';
+          throw new Error(message);
         }
       },
 
-      register: async (name: string, email: string, password: string) => {
+      register: async (familyName: string, email: string, password: string) => {
         set({ isLoading: true });
         try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Mock successful registration
-          const mockUser: User = {
-            id: '1',
+          const response = await api.post('/auth/register', {
             email,
-            name,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
-          };
-          
-          const mockToken = 'mock-jwt-token-' + Date.now();
-          
-          set({
-            user: mockUser,
-            token: mockToken,
-            isAuthenticated: true,
-            isLoading: false
+            password,
+            familyName,
           });
-        } catch (error) {
+      
+          const { token, user } = response.data;
+      
+          set({
+            user,
+            token,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+      
+          // Optionally persist token manually if needed
+          localStorage.setItem('token', token);
+      
+        } catch (error: any) {
           set({ isLoading: false });
-          throw new Error('Registration failed');
+          const message =
+            error.response?.data?.error || 'Registration failed. Please try again.';
+          throw new Error(message);
         }
       },
 

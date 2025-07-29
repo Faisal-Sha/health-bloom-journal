@@ -11,7 +11,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Heart, Loader2 } from 'lucide-react';
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  familyName: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
@@ -30,7 +30,7 @@ export default function Register() {
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: '',
+      familyName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -39,7 +39,7 @@ export default function Register() {
 
   const onSubmit = async (data: RegisterForm) => {
     try {
-      await register(data.name, data.email, data.password);
+      await register(data.familyName, data.email, data.password);
       toast({
         title: 'Welcome to HealthDiary!',
         description: 'Your account has been created successfully.',
@@ -78,10 +78,10 @@ export default function Register() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="familyName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>Family Name</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Enter your full name"

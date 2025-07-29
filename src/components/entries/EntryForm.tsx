@@ -128,10 +128,10 @@ export function EntryForm({ entry, onSubmit, onCancel }: EntryFormProps) {
                   <SelectValue placeholder="Select family member" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  {/* <SelectItem value="none">None</SelectItem> */}
                   {members.map((member) => (
                     <SelectItem key={member.id} value={member.id}>
-                      {member.name} ({member.relation})
+                      {member.name} ({member.role})
                     </SelectItem>
                   ))}
                 </SelectContent>

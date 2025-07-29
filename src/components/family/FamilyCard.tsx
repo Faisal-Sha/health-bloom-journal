@@ -18,12 +18,12 @@ export function FamilyCard({ member, onEdit, onDelete }: FamilyCardProps) {
         <Avatar className="h-16 w-16 mx-auto mb-2">
           <AvatarImage src={member.avatar} alt={member.name} />
           <AvatarFallback className="text-lg">
-            {member.name.split(' ').map(n => n[0]).join('')}
+            {member.avatar}
           </AvatarFallback>
         </Avatar>
         <h3 className="font-semibold text-lg">{member.name}</h3>
         <Badge variant="secondary" className="w-fit mx-auto">
-          {member.relation}
+          {member.role}
         </Badge>
       </CardHeader>
       

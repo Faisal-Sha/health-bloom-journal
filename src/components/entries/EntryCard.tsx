@@ -62,7 +62,7 @@ export function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
         {familyMember && (
           <div className="flex items-center gap-2 mb-3 text-sm text-muted-foreground">
             <User className="h-4 w-4" />
-            <span>{familyMember.name} ({familyMember.relation})</span>
+            <span>{familyMember.name} ({familyMember.role})</span>
           </div>
         )}
         
