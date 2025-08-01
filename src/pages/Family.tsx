@@ -133,18 +133,18 @@ export default function Family() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground mb-1">Total Members</div>
-                <div className="text-3xl font-bold text-primary">{members.length}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-muted/100 p-4 rounded-lg text-center">
+                <p className="text-sm font-medium text-foreground mb-1">Total Members</p>
+                <p className="text-2xl font-bold text-primary">{members.length}</p>
               </div>
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground mb-1">Total Entries</div>
-                <div className="text-3xl font-bold text-primary">{totalEntries}</div>
+              <div className="bg-muted/100 p-4 rounded-lg text-center">
+                <p className="text-sm font-medium text-foreground mb-1">Total Entries</p>
+                <p className="text-2xl font-bold text-success">{totalEntries}</p>
               </div>
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground mb-1">Avg Health Score</div>
-                <div className="text-3xl font-bold text-warning">{avgHealthScore}/10</div>
+              <div className="bg-muted/100 p-4 rounded-lg text-center">
+                <p className="text-sm font-medium text-foreground mb-1">Avg Health Score</p>
+                <p className="text-2xl font-bold text-warning">{avgHealthScore}/10</p>
               </div>
             </div>
           </CardContent>

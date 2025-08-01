@@ -27,15 +27,19 @@ export default function Entries() {
   // Check if a specific member was selected from family page
   const selectedMemberId = searchParams.get('member');
   
+  // 1. Fetch members once
   useEffect(() => {
     fetchMembers();
+  }, [fetchMembers]);
+
+  // 2. When members are available, fetch entries
+  useEffect(() => {
     if (members.length > 0) {
-      // Fetch entries for all members or specific member
       members.forEach(member => {
         fetchEntries(member.id);
       });
     }
-  }, [fetchMembers, fetchEntries, members.length]);
+  }, [members, fetchEntries]);
 
   useEffect(() => {
     // Auto-open form if coming from family page with selected member
@@ -45,7 +49,7 @@ export default function Entries() {
   }, [selectedMemberId, members.length]);
 
   const filteredEntries = entries.filter((entry) => {
-    const matchesSearch = entry.text.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = entry.text?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
     const matchesDate = !selectedDate || entry.date === format(selectedDate, 'yyyy-MM-dd');
     
     return matchesSearch && matchesDate;
