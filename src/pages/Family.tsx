@@ -98,7 +98,10 @@ export default function Family() {
             <p className="text-muted-foreground">Manage health records for your family</p>
           </div>
           <Button
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setEditingMember(null);
+              setShowForm(true);
+            }}
             className="bg-gradient-wellness hover:opacity-90"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -115,7 +118,10 @@ export default function Family() {
                 Start by adding family members to track their health alongside yours.
               </p>
               <Button
-                onClick={() => setShowForm(true)}
+                onClick={() => {
+                  setEditingMember(null);
+                  setShowForm(true);
+                }}
                 className="bg-gradient-wellness hover:opacity-90"
               >
                 <Plus className="h-4 w-4 mr-2" />
