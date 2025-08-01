@@ -21,9 +21,10 @@ interface EntryFormProps {
   entry?: DiaryEntry;
   onSubmit: (data: EntryFormData) => void;
   onCancel: () => void;
+  preSelectedMember?: any;
 }
 
-export function EntryForm({ entry, onSubmit, onCancel }: EntryFormProps) {
+export function EntryForm({ entry, onSubmit, onCancel, preSelectedMember }: EntryFormProps) {
   const { members } = useFamilyStore();
 
   const form = useForm<EntryFormData>({
@@ -31,7 +32,7 @@ export function EntryForm({ entry, onSubmit, onCancel }: EntryFormProps) {
     defaultValues: {
       text: entry?.text || '',
       date: entry?.date || new Date().toISOString().split('T')[0],
-      user_id: entry?.user_id || (members[0]?.id || 1),
+      user_id: entry?.user_id || preSelectedMember?.id || (members[0]?.id || 1),
     },
   });
 

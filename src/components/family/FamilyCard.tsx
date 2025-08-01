@@ -9,35 +9,65 @@ interface FamilyCardProps {
   member: FamilyMember;
   onEdit: (member: FamilyMember) => void;
   onDelete: (id: number) => void;
+  onClick?: (member: FamilyMember) => void;
 }
 
-export function FamilyCard({ member, onEdit, onDelete }: FamilyCardProps) {
+export function FamilyCard({ member, onEdit, onDelete, onClick }: FamilyCardProps) {
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick(member);
+    }
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(member);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(member.id);
+  };
+
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
-      <CardHeader className="text-center pb-2">
-        <Avatar className="h-16 w-16 mx-auto mb-2">
-          <AvatarImage src={member.avatar} alt={member.name} />
-          <AvatarFallback className="text-lg">
-            {member.avatar}
-          </AvatarFallback>
-        </Avatar>
-        <h3 className="font-semibold text-lg">{member.name}</h3>
-        <Badge variant="secondary" className="w-fit mx-auto">
-          {member.role}
-        </Badge>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">Entries</p>
-            <p className="font-medium">{member.entry_count}</p>
+    <Card 
+      className="hover:shadow-md transition-shadow duration-200 cursor-pointer group"
+      onClick={handleCardClick}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-start gap-4">
+          {/* Avatar */}
+          <div className="flex-shrink-0">
+            <div 
+              className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
+              style={{ backgroundColor: member.color + '20' }}
+            >
+              {member.avatar}
+            </div>
           </div>
-          <div className="flex gap-2">
+          
+          {/* Member Info */}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-lg truncate mb-1">{member.name}</h3>
+            
+            {/* Stats Row */}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+              <span>📝 {member.entry_count} entries</span>
+              <span>❤️ {member.healthScore}/10</span>
+            </div>
+            
+            {/* Last Active */}
+            <div className="text-xs text-muted-foreground">
+              Last active: {new Date(member.lastActive).toLocaleDateString()}
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onEdit(member)}
+              onClick={handleEditClick}
               className="h-8 w-8 p-0"
             >
               <Edit className="h-4 w-4" />
@@ -45,12 +75,19 @@ export function FamilyCard({ member, onEdit, onDelete }: FamilyCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onDelete(member.id)}
+              onClick={handleDeleteClick}
               className="h-8 w-8 p-0 text-destructive hover:text-destructive"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+        
+        {/* Role Badge */}
+        <div className="mt-3">
+          <Badge variant="secondary" className="text-xs">
+            {member.role}
+          </Badge>
         </div>
       </CardContent>
     </Card>

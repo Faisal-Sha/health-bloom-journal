@@ -1,26 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Search, CalendarIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { useEntryStore, DiaryEntry } from '@/stores/entryStore';
+import { useFamilyStore } from '@/stores/familyStore';
 import { EntryForm } from '@/components/entries/EntryForm';
 import { EntryCard } from '@/components/entries/EntryCard';
 import { useToast } from '@/hooks/use-toast';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Entries() {
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<DiaryEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [selectedMood, setSelectedMood] = useState<string>('');
-  const { entries, addEntry, updateEntry, deleteEntry } = useEntryStore();
+  const [searchParams] = useSearchParams();
+  const { entries, addEntry, updateEntry, deleteEntry, fetchEntries } = useEntryStore();
+  const { members, fetchMembers } = useFamilyStore();
   const { toast } = useToast();
+
+  // Check if a specific member was selected from family page
+  const selectedMemberId = searchParams.get('member');
+  
+  useEffect(() => {
+    fetchMembers();
+    if (members.length > 0) {
+      // Fetch entries for all members or specific member
+      members.forEach(member => {
+        fetchEntries(member.id);
+      });
+    }
+  }, [fetchMembers, fetchEntries, members.length]);
+
+  useEffect(() => {
+    // Auto-open form if coming from family page with selected member
+    if (selectedMemberId && members.length > 0) {
+      setShowForm(true);
+    }
+  }, [selectedMemberId, members.length]);
 
   const filteredEntries = entries.filter((entry) => {
     const matchesSearch = entry.text.toLowerCase().includes(searchTerm.toLowerCase());
@@ -29,19 +51,38 @@ export default function Entries() {
     return matchesSearch && matchesDate;
   });
 
-  const handleSubmit = (data: any) => {
+  const handleSubmit = async (data: any) => {
+    let result;
     if (editingEntry) {
-      updateEntry(editingEntry.id, data);
-      toast({
-        title: "Entry Updated",
-        description: "Your diary entry has been successfully updated.",
-      });
+      result = await updateEntry(editingEntry.id, { text: data.text });
+      if (result.success) {
+        toast({
+          title: "Entry Updated",
+          description: "Your diary entry has been successfully updated.",
+        });
+      } else {
+        toast({
+          title: "Update Failed",
+          description: result.message || "Could not update entry.",
+          variant: "destructive",
+        });
+        return;
+      }
     } else {
-      addEntry(data);
-      toast({
-        title: "Entry Created",
-        description: "Your new diary entry has been saved.",
-      });
+      result = await addEntry(data);
+      if (result.success) {
+        toast({
+          title: "Entry Created",
+          description: "Your new diary entry has been saved.",
+        });
+      } else {
+        toast({
+          title: "Creation Failed", 
+          description: result.message || "Could not create entry.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
     setShowForm(false);
     setEditingEntry(null);
@@ -52,22 +93,35 @@ export default function Entries() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: number) => {
-    deleteEntry(id);
-    toast({
-      title: "Entry Deleted",
-      description: "The diary entry has been removed.",
-      variant: "destructive",
-    });
+  const handleDelete = async (id: number) => {
+    const result = await deleteEntry(id);
+    if (result.success) {
+      toast({
+        title: "Entry Deleted",
+        description: result.message || "The diary entry has been removed.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Deletion Failed",
+        description: result.message || "Could not delete entry.",
+        variant: "destructive",
+      });
+    }
   };
 
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedDate(undefined);
-    setSelectedMood('');
   };
 
-  const moods = ['happy', 'neutral', 'sad', 'anxious', 'excited'];
+  // Get the pre-selected member for the form
+  const getPreSelectedMember = () => {
+    if (selectedMemberId) {
+      return members.find(m => m.id.toString() === selectedMemberId);
+    }
+    return undefined;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-calm">
@@ -180,6 +234,7 @@ export default function Entries() {
                 setShowForm(false);
                 setEditingEntry(null);
               }}
+              preSelectedMember={getPreSelectedMember()}
             />
           </DialogContent>
         </Dialog>
