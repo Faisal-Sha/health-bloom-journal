@@ -58,8 +58,8 @@ export default function Family() {
     setShowForm(true);
   };
 
-  const handleDelete = async(id: string) => {
-    const memberEntries = entries.filter(entry => entry.familyMemberId === id);
+  const handleDelete = async(id: number) => {
+    const memberEntries = entries.filter(entry => entry.user_id === id);
     if (memberEntries.length > 0) {
       toast({
         title: "Cannot Delete",
@@ -85,8 +85,8 @@ export default function Family() {
     }
   };
 
-  const getMemberStats = (memberId: string) => {
-    return entries.filter(entry => entry.familyMemberId === memberId).length;
+  const getMemberStats = (memberId: number) => {
+    return entries.filter(entry => entry.user_id === memberId).length;
   };
 
   return (
@@ -140,7 +140,7 @@ export default function Family() {
                 />
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground">
-                    {getMemberStats(member.id)} diary entries
+                    {member.entry_count} diary entries
                   </p>
                 </div>
               </div>

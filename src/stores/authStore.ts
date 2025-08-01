@@ -3,10 +3,9 @@ import { persist } from 'zustand/middleware';
 import api from '@/services/apiClient';
 
 interface User {
-  id: string;
+  id: number;
   email: string;
-  name: string;
-  avatar?: string;
+  familyName: string;
 }
 
 interface AuthState {
@@ -52,7 +51,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (familyName: string, email: string, password: string) => {
+      register: async (email: string, password: string, familyName: string) => {
         set({ isLoading: true });
         try {
           const response = await api.post('/auth/register', {

@@ -23,14 +23,10 @@ export default function Entries() {
   const { toast } = useToast();
 
   const filteredEntries = entries.filter((entry) => {
-    const matchesSearch = entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         entry.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+    const matchesSearch = entry.text.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDate = !selectedDate || entry.date === format(selectedDate, 'yyyy-MM-dd');
-    const matchesMood = !selectedMood || entry.mood === selectedMood;
     
-    return matchesSearch && matchesDate && matchesMood;
+    return matchesSearch && matchesDate;
   });
 
   const handleSubmit = (data: any) => {
@@ -56,7 +52,7 @@ export default function Entries() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     deleteEntry(id);
     toast({
       title: "Entry Deleted",
@@ -127,19 +123,7 @@ export default function Entries() {
                   />
                 </PopoverContent>
               </Popover>
-              <div className="flex gap-2">
-                {moods.map((mood) => (
-                  <Badge
-                    key={mood}
-                    variant={selectedMood === mood ? "default" : "secondary"}
-                    className="cursor-pointer"
-                    onClick={() => setSelectedMood(selectedMood === mood ? '' : mood)}
-                  >
-                    {mood}
-                  </Badge>
-                ))}
-              </div>
-              {(searchTerm || selectedDate || selectedMood) && (
+              {(searchTerm || selectedDate) && (
                 <Button variant="ghost" onClick={clearFilters}>
                   Clear
                 </Button>

@@ -8,7 +8,7 @@ import { FamilyMember } from '@/stores/familyStore';
 interface FamilyCardProps {
   member: FamilyMember;
   onEdit: (member: FamilyMember) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export function FamilyCard({ member, onEdit, onDelete }: FamilyCardProps) {
@@ -30,8 +30,8 @@ export function FamilyCard({ member, onEdit, onDelete }: FamilyCardProps) {
       <CardContent>
         <div className="flex items-center justify-between">
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">Age</p>
-            <p className="font-medium">{member.age}</p>
+            <p className="text-sm text-muted-foreground">Entries</p>
+            <p className="font-medium">{member.entry_count}</p>
           </div>
           <div className="flex gap-2">
             <Button

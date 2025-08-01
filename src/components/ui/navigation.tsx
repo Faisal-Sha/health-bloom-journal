@@ -65,13 +65,11 @@ export function Navigation() {
             {user ? (
               <>
                 <div className="flex items-center space-x-3">
-                  <img
-                    className="h-8 w-8 rounded-full"
-                    src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}
-                    alt={user.name}
-                  />
+                  <div className="h-8 w-8 rounded-full bg-gradient-wellness flex items-center justify-center text-white font-bold">
+                    {user.familyName?.charAt(0)?.toUpperCase()}
+                  </div>
                   <span className="text-sm font-medium text-foreground hidden sm:block">
-                    {user.name}
+                    {user.familyName}
                   </span>
                 </div>
                 <Button

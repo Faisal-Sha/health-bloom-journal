@@ -1,4 +1,3 @@
-import { formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -9,54 +8,40 @@ import { useFamilyStore } from '@/stores/familyStore';
 interface EntryCardProps {
   entry: DiaryEntry;
   onEdit: (entry: DiaryEntry) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
-
-const moodEmojis = {
-  happy: '😊',
-  neutral: '😐',
-  sad: '😢',
-  anxious: '😰',
-  excited: '🤩',
-};
-
-const moodColors = {
-  happy: 'bg-green-100 text-green-800',
-  neutral: 'bg-gray-100 text-gray-800',
-  sad: 'bg-blue-100 text-blue-800',
-  anxious: 'bg-yellow-100 text-yellow-800',
-  excited: 'bg-purple-100 text-purple-800',
-};
 
 export function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
   const { getMemberById } = useFamilyStore();
-  const familyMember = entry.familyMemberId ? getMemberById(entry.familyMemberId) : null;
+  const familyMember = getMemberById(entry.user_id);
 
   return (
     <Card className="hover:shadow-md transition-shadow duration-200">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="font-semibold text-lg line-clamp-1">{entry.title}</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-semibold text-lg line-clamp-1">
               {new Date(entry.date).toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
               })}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              AI Confidence: {entry.ai_confidence}%
             </p>
           </div>
-          <Badge className={`${moodColors[entry.mood]} flex items-center gap-1`}>
-            <span>{moodEmojis[entry.mood]}</span>
-            <span className="capitalize">{entry.mood}</span>
+          <Badge variant="outline" className="flex items-center gap-1">
+            <span>📝</span>
+            <span>Entry</span>
           </Badge>
         </div>
       </CardHeader>
       
       <CardContent>
         <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-          {entry.content}
+          {entry.text_preview || entry.text}
         </p>
         
         {familyMember && (
@@ -65,21 +50,11 @@ export function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
             <span>{familyMember.name} ({familyMember.role})</span>
           </div>
         )}
-        
-        {entry.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {entry.tags.map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
-                #{tag}
-              </Badge>
-            ))}
-          </div>
-        )}
       </CardContent>
       
       <CardFooter className="pt-2 flex items-center justify-between">
         <span className="text-xs text-muted-foreground">
-          {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
+          {entry.date}
         </span>
         <div className="flex gap-2">
           <Button

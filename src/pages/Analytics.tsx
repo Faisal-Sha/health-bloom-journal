@@ -20,16 +20,17 @@ export default function Analytics() {
   const { members } = useFamilyStore();
 
   const analytics = useMemo(() => {
-    // Mood distribution
-    const moodCounts = entries.reduce((acc, entry) => {
-      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+    // Entry distribution by confidence level
+    const confidenceCounts = entries.reduce((acc, entry) => {
+      const level = entry.ai_confidence > 80 ? 'high' : entry.ai_confidence > 50 ? 'medium' : 'low';
+      acc[level] = (acc[level] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    const moodData = Object.entries(moodCounts).map(([mood, count]) => ({
-      mood: mood.charAt(0).toUpperCase() + mood.slice(1),
+    const confidenceData = Object.entries(confidenceCounts).map(([level, count]) => ({
+      level: level.charAt(0).toUpperCase() + level.slice(1),
       count,
-      color: MOOD_COLORS[mood as keyof typeof MOOD_COLORS],
+      color: level === 'high' ? '#10b981' : level === 'medium' ? '#f59e0b' : '#ef4444',
     }));
 
     // Entries over time (last 6 months)
@@ -69,11 +70,11 @@ export default function Analytics() {
 
     // Family member stats
     const familyStats = members.map(member => {
-      const memberEntries = entries.filter(entry => entry.familyMemberId === member.id);
+      const memberEntries = entries.filter(entry => entry.user_id === member.id);
       return {
         name: member.name,
         entries: memberEntries.length,
-        relation: member.relation,
+        role: member.role,
       };
     });
 
@@ -82,13 +83,13 @@ export default function Analytics() {
 
     return {
       totalEntries: entries.length,
-      moodData,
+      confidenceData,
       timeData,
       weeklyData,
       familyStats,
       recentEntries,
       averageEntriesPerWeek: entries.length > 0 ? (entries.length / Math.max(1, Math.ceil(entries.length / 7))).toFixed(1) : '0',
-      mostFrequentMood: moodData.length > 0 ? moodData.reduce((prev, current) => (prev.count > current.count) ? prev : current).mood : 'None',
+      averageConfidence: entries.length > 0 ? (entries.reduce((sum, entry) => sum + entry.ai_confidence, 0) / entries.length).toFixed(1) : '0',
     };
   }, [entries, members]);
 
@@ -147,11 +148,11 @@ export default function Analytics() {
 
           <Card className="shadow-soft border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Most Frequent Mood</CardTitle>
+              <CardTitle className="text-sm font-medium">Avg AI Confidence</CardTitle>
               <Heart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.mostFrequentMood}</div>
+              <div className="text-2xl font-bold">{analytics.averageConfidence}%</div>
             </CardContent>
           </Card>
 
@@ -167,25 +168,25 @@ export default function Analytics() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Mood Distribution */}
+          {/* AI Confidence Distribution */}
           <Card className="shadow-soft border-border">
             <CardHeader>
-              <CardTitle>Mood Distribution</CardTitle>
+              <CardTitle>AI Analysis Confidence</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={analytics.moodData}
+                    data={analytics.confidenceData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ mood, count, percent }) => `${mood}: ${count} (${(percent * 100).toFixed(0)}%)`}
+                    label={({ level, count, percent }) => `${level}: ${count} (${(percent * 100).toFixed(0)}%)`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="count"
                   >
-                    {analytics.moodData.map((entry, index) => (
+                    {analytics.confidenceData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -245,7 +246,7 @@ export default function Analytics() {
                     <div key={index} className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">{member.name}</p>
-                        <p className="text-sm text-muted-foreground">{member.relation}</p>
+                        <p className="text-sm text-muted-foreground">{member.role}</p>
                       </div>
                       <Badge variant="secondary">
                         {member.entries} entries

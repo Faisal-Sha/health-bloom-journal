@@ -77,7 +77,7 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Welcome back, {user?.name}! 👋
+            Welcome back, {user?.familyName}! 👋
           </h1>
           <p className="text-muted-foreground">
             Here's your wellness overview for today.

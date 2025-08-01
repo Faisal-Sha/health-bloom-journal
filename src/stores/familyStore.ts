@@ -3,37 +3,53 @@ import { persist } from 'zustand/middleware';
 import api from '@/services/apiClient';
 
 export interface FamilyMember {
-  id: string;
+  id: number;
   name: string;
-  age?: number;
-  avatar?: string;
-  color?: string;
-  role?: string;
-  userName: string;
+  avatar: string;
+  color: string;
+  role: string;
+  username: string;
+  entry_count: number;
+  healthScore: number;
+  lastActive: string;
 }
 
 interface FamilyState {
   members: FamilyMember[];
-  addMember: (member: Omit<FamilyMember, 'id' | 'createdAt' | 'updatedAt'>) => Promise< { success: boolean; message?: string; profile?: FamilyMember }>;
-  updateMember: (id: string, member: Partial<FamilyMember>) => Promise< { success: boolean; message?: string; profile?: FamilyMember }>;
-  deleteMember: (id: string) => Promise<{ success: boolean; message: string }>;
-  getMemberById: (id: string) => FamilyMember | undefined;
+  isLoading: boolean;
+  fetchMembers: () => Promise<void>;
+  addMember: (member: { name: string; avatar: string; color: string }) => Promise<{ success: boolean; message?: string; profile?: FamilyMember }>;
+  updateMember: (id: number, member: Partial<FamilyMember>) => Promise<{ success: boolean; message?: string; profile?: FamilyMember }>;
+  deleteMember: (id: number) => Promise<{ success: boolean; message: string }>;
+  getMemberById: (id: number) => FamilyMember | undefined;
 }
 
 export const useFamilyStore = create<FamilyState>()(
   persist(
     (set, get) => ({
       members: [],
+      isLoading: false,
 
-      addMember: async (newMember: FamilyMember) => {
+      fetchMembers: async () => {
+        set({ isLoading: true });
+        try {
+          const response = await api.get('/family/profiles');
+          set({ members: response.data, isLoading: false });
+        } catch (error) {
+          console.error('Error fetching members:', error);
+          set({ isLoading: false });
+        }
+      },
+
+      addMember: async (newMember) => {
         try {
           const response = await api.post('/family/profiles', newMember);
           const createdMember: FamilyMember = response.data.profile;
           set((state) => ({
             members: [...state.members, createdMember]
           }));
-          return {success: true, profile: createdMember};
-        } catch (error) {
+          return { success: true, profile: createdMember };
+        } catch (error: any) {
           console.error('Error adding member:', error);
           return { success: false, message: error?.response?.data?.message || 'Failed to add member.' };
         }
@@ -48,7 +64,7 @@ export const useFamilyStore = create<FamilyState>()(
               member.id === id ? updatedMember : member
             )
           }));
-          return {success: true, profile: updatedMember};
+          return { success: true, profile: updatedMember };
         } catch (error: any) {
           console.error('Error updating member:', error);
           return { success: false, message: error?.response?.data?.message || 'Failed to update member.' };
