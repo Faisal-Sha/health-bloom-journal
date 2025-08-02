@@ -4,7 +4,7 @@ import api from '@/services/apiClient';
 
 export interface DiaryEntry {
   id: number;
-  text: string;
+  entry_text: string;
   date: string;
   user_id: number;
   ai_confidence: number;
@@ -14,7 +14,14 @@ export interface DiaryEntry {
 interface EntryState {
   entries: DiaryEntry[];
   isLoading: boolean;
-  fetchEntries: (userId: number, limit?: number) => Promise<void>;
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+  } | null;
+  fetchAllEntries: (page?: number, pageSize?: number) => Promise<void>;
+  fetchMemberEntries: (userId: number, limit?: number) => Promise<void>;
   addEntry: (entry: { text: string; user_id: number; date: string }) => Promise<{ success: boolean; message?: string; entry_id?: number }>;
   updateEntry: (id: number, entry: { text: string }) => Promise<{ success: boolean; message?: string }>;
   deleteEntry: (id: number) => Promise<{ success: boolean; message?: string }>;
@@ -27,8 +34,20 @@ export const useEntryStore = create<EntryState>()(
     (set, get) => ({
       entries: [],
       isLoading: false,
+      pagination: null,
 
-      fetchEntries: async (userId, limit = 50) => {
+      fetchAllEntries: async (page=1, pageSize=20) => {
+        set({ isLoading: true });
+        try {
+          const response = await api.get(`/entries/all?page=${page}&page_size=${pageSize}`);
+          set({ entries: response.data.entries, isLoading: false, pagination: response.data.pagination });
+        } catch (error) {
+          console.error('Error fetching entries:', error);
+          set({ isLoading: false });
+        }
+      },
+
+      fetchMemberEntries: async (userId, limit = 50) => {
         set({ isLoading: true });
         try {
           const response = await api.get(`/entries?user_id=${userId}&limit=${limit}`);

@@ -20,9 +20,10 @@ export default function Entries() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [searchParams] = useSearchParams();
-  const { entries, addEntry, updateEntry, deleteEntry, fetchEntries } = useEntryStore();
+  const { entries, addEntry, updateEntry, deleteEntry, fetchAllEntries, pagination } = useEntryStore();
   const { members, fetchMembers } = useFamilyStore();
   const { toast } = useToast();
+  const [page, setPage] = useState(1);
 
   // Check if a specific member was selected from family page
   const selectedMemberId = searchParams.get('member');
@@ -35,11 +36,9 @@ export default function Entries() {
   // 2. When members are available, fetch entries
   useEffect(() => {
     if (members.length > 0) {
-      members.forEach(member => {
-        fetchEntries(member.id);
-      });
+      fetchAllEntries(page, pagination?.page_size || 20); // Fetch entries for the first member();
     }
-  }, [members, fetchEntries]);
+  }, [members, fetchAllEntries, page]);
 
   useEffect(() => {
     // Auto-open form if coming from family page with selected member
@@ -49,7 +48,7 @@ export default function Entries() {
   }, [selectedMemberId, members.length]);
 
   const filteredEntries = entries.filter((entry) => {
-    const matchesSearch = entry.text?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
+    const matchesSearch = entry.entry_text?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
     const matchesDate = !selectedDate || entry.date === format(selectedDate, 'yyyy-MM-dd');
     
     return matchesSearch && matchesDate;
@@ -243,6 +242,30 @@ export default function Entries() {
           </DialogContent>
         </Dialog>
       </div>
+      {pagination?.total_pages > 1 && (
+        <div className="mt-8 flex justify-center gap-4">
+          <Button
+            variant="outline"
+            disabled={page === 1}
+            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+          >
+            Previous
+          </Button>
+          <span className="text-muted-foreground self-center">
+            Page {pagination?.page} of {pagination?.total_pages}
+          </span>
+          <Button
+            variant="outline"
+            disabled={page === pagination?.total_pages}
+            onClick={() => setPage((prev) => Math.min(pagination?.total_pages || 1, prev + 1))}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+      <p className="text-sm text-muted-foreground mt-2 text-center">
+        Showing page {pagination?.page} of {pagination?.total_pages} ({pagination?.total} entries)
+      </p>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import Entries from "./pages/Entries";
 import Family from "./pages/Family";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
+import MemberEntries from "./pages/MemberEntries";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,11 @@ const App = () => (
             <ProtectedRoute>
               <Entries />
             </ProtectedRoute>
+          } />
+          <Route path="/entries/:memberId" element={
+            <ProtectedRoute>
+              <MemberEntries />
+            </ProtectedRoute>  
           } />
           <Route path="/family" element={
             <ProtectedRoute>

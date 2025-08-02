@@ -92,7 +92,8 @@ export default function Family() {
   };
 
   const handleCardClick = (member: FamilyMember) => {
-    navigate(`/entries?member=${member.id}`);
+    // navigate(`/entries?member=${member.id}`);
+    navigate(`/entries/${member.id}`);
   };
 
   const totalEntries = members.reduce((sum, member) => sum + member.entry_count, 0);
