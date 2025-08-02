@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DiaryEntry } from '@/stores/entryStore';
 import { useFamilyStore } from '@/stores/familyStore';
+import { VoiceRecorder } from '@/components/ui/voice-recorder';
 
 const entrySchema = z.object({
   text: z.string().min(1, 'Entry text is required'),
@@ -85,6 +86,7 @@ export function EntryForm({ entry, onSubmit, onCancel, preSelectedMember }: Entr
               placeholder="What happened today? How are you feeling?"
               rows={8}
             />
+            <VoiceRecorder onTranscript={(text) => form.setValue('text', `${form.getValues('text')} ${text}`.trim())}/>
             {form.formState.errors.text && (
               <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>
             )}

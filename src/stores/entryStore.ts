@@ -4,7 +4,7 @@ import api from '@/services/apiClient';
 
 export interface DiaryEntry {
   id: number;
-  entry_text: string;
+  text: string;
   date: string;
   user_id: number;
   ai_confidence: number;

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, CalendarIcon, Filter } from 'lucide-react';
+import { Plus, Search, CalendarIcon, Filter, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { useEntryStore, DiaryEntry } from '@/stores/entryStore';
 import { useFamilyStore } from '@/stores/familyStore';
@@ -13,6 +13,7 @@ import { EntryForm } from '@/components/entries/EntryForm';
 import { EntryCard } from '@/components/entries/EntryCard';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'react-router-dom';
+import { BulkImportDialog } from '@/components/entries/BulkImportDialogue';
 
 export default function Entries() {
   const [showForm, setShowForm] = useState(false);
@@ -24,6 +25,7 @@ export default function Entries() {
   const { members, fetchMembers } = useFamilyStore();
   const { toast } = useToast();
   const [page, setPage] = useState(1);
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   // Check if a specific member was selected from family page
   const selectedMemberId = searchParams.get('member');
@@ -48,7 +50,7 @@ export default function Entries() {
   }, [selectedMemberId, members.length]);
 
   const filteredEntries = entries.filter((entry) => {
-    const matchesSearch = entry.entry_text?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
+    const matchesSearch = entry.text?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
     const matchesDate = !selectedDate || entry.date === format(selectedDate, 'yyyy-MM-dd');
     
     return matchesSearch && matchesDate;
@@ -129,18 +131,32 @@ export default function Entries() {
   return (
     <div className="min-h-screen bg-gradient-calm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
+        <div className="flex justify-between items-center mb-4">
+          <div className="pl-1">
             <h1 className="text-3xl font-bold text-foreground mb-2">Diary Entries</h1>
             <p className="text-muted-foreground">Track your daily thoughts and emotions</p>
           </div>
-          <Button
-            onClick={() => setShowForm(true)}
-            className="bg-gradient-wellness hover:opacity-90"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Entry
-          </Button>
+          <div className="flex justify-end gap-2 pr-1">
+            <Button 
+              onClick={() => setShowBulkImport(true)}
+              className="bg-gradient-wellness hover:opacity-90"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import Entries
+            </Button>
+
+            <BulkImportDialog
+              isOpen={showBulkImport}
+              onClose={() => setShowBulkImport(false)}
+            />
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-gradient-wellness hover:opacity-90"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Entry
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
