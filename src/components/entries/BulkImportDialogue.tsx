@@ -45,7 +45,7 @@ export function BulkImportDialog({ isOpen, onClose, preSelectedMemberId }: BulkI
     formData.append('file_type', fileType);
 
     try {
-      const response = await api.post('/entries/bulk-import-file', formData, {
+      const response = await api.post('/entries/bulk-import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
